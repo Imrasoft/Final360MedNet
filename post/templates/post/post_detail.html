@@ -1,9 +1,10 @@
 {% extends "userprofile/home.html" %}
-{% load staticfiles %}
+{% load static %}
 {% load material_form %}
 
-{% block title_block %} Post | 360 MedNet {% endblock %}
-{% block large %}
+{% block title %} {{ post.title }} | Discussion | 360 MedNet {% endblock %}
+{% block content %}
+    <div class="container">
     <div class="card">
     <div class="container">
     <br><br>
@@ -35,6 +36,6 @@
         <div class="divider"></div>
         <br>
     {% endfor %}
-    </div></div>
+    </div></div></div>
 
 {% endblock %}

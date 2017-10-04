@@ -1,15 +1,11 @@
-from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import EmailMessage
-from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from django.template.loader import render_to_string
 from django.urls import reverse
 from userprofile.models import Doctor
 from .forms import MedicInvitationForm, FriendInvitationForm, RegistrationForm1, RegistrationForm2, RegistrationForm3, \
-    RegistrationForm4, SuggestedInviteeForm
-from .models import Invitation, FriendInvitation, SuggestedInvitee
+    SuggestedInviteeForm
+from .models import Invitation, FriendInvitation
 from django.contrib.auth.models import User
 from userprofile.forms import DoctorForm, UserForm
 from django.contrib import messages
@@ -19,6 +15,11 @@ from django.template import Context
 from django.conf import settings
 
 home = settings.SITE_HOST
+
+
+def replace_spaces_with_hyphen(name):
+    clean_name = "-".join(name.split())
+    return clean_name
 
 
 @staff_member_required
@@ -34,8 +35,8 @@ def invite_user(request):
                 code=User.objects.make_random_password(6)
             )
             if invitation.email:
-                invitation.save()
                 invitation.send_invite()
+                invitation.save()
                 messages.success(request,
                                  message='Invitation successfully sent to %s.' %
                                          invitation.email
@@ -66,6 +67,7 @@ def bulk_invite(request):
     return HttpResponse('Successfully invited %s medics via email' % invited_medics)
 
 
+@staff_member_required
 def invite_friend(request):
     if request.method == 'POST':
         form = FriendInvitationForm(request.POST)
@@ -142,11 +144,10 @@ def registration_one(request):
             request.session['first_name'] = form.cleaned_data['first_name']
             request.session['last_name'] = form.cleaned_data['last_name']
             request.session['invitation_code'] = form.cleaned_data['invitation_code']
-            context = Context({
-                'first_name': request.session['first_name'],
-                'domain': home})
+            first_name = request.session['first_name']
 
-            Invitation.send_signup_email(context, request.session['invitation_code'])
+            # Invitation.send_signup_email(first_name,  request.session.get('invitation_code', None))
+            Invitation.objects.filter(code=request.session['invitation_code']).update(accepted=True)
             return HttpResponseRedirect(reverse('reg_2'))
     return render(request, 'invitation/registration_one.html', {'form': form})
 
@@ -159,7 +160,8 @@ def registration_two(request):
     if request.method == 'POST':
         if doctor_form.is_valid() and user_form.is_valid():
             user = user_form.save()
-            user.username = first_name + "-" + last_name + "-" + User.objects.make_random_password(8)
+            user.username = replace_spaces_with_hyphen(first_name) + "-" + replace_spaces_with_hyphen(last_name) \
+                            + "-" + User.objects.make_random_password(8)
             user.first_name = request.session['first_name']
             user.last_name = request.session['last_name']
             user.set_password(user.password)
@@ -203,3 +205,15 @@ def send_suggested_invitee(request):
                                               "verified." % instance.name)
 
     return render(request, 'invitation/suggest_invitee.html', locals())
+
+
+def invite_email(request):
+    return render(request, 'invitation/emails/invitation_email.html')
+
+
+def sign_up(request):
+    return render(request, 'invitation/emails/signup1_email.html')
+
+
+def thank_you_signup(request):
+    return render(request, 'invitation/emails/thank_you_signup_email.html')

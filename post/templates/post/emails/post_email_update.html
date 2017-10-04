@@ -31,16 +31,7 @@
 <body>
 Hello {{ doctor.first_name}},
 <br>
-<p>Here are some updates from us for you!
-</p>
-
-{%  if weekly_five_medical_cases.count > 0 %}
-    <h2>Top Medical Cases</h2>
-{% for weekly_five_medical_case in weekly_five_medical_cases %}
-    <h3><a href="{{ domain }}{% url 'medical-case-detail' weekly_five_medical_case.id %}">{{ weekly_five_medical_case.title }}</a></h3>
-    {{ weekly_five_medical_case.chief_complaint }}
-{% endfor %}
-{% endif %}
+<p>Discussion Updates!</p>
 
 <br>
 {% if weekly_top_five_discussions.count > 0 %}

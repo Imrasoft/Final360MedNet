@@ -50,7 +50,6 @@ if DEBUG is False:
 
     X_FRAME_OPTIONS = 'DENY'
 
-
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
 # Application definition
@@ -62,6 +61,8 @@ INSTALLED_APPS = [
     'jet',
     'jet.dashboard',
     'django.contrib.admin',
+    'userprofile',  # for inbuilt password reset to work.. though causes issues with migrating. First comment out
+    # then migrate userprofile after
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -81,7 +82,7 @@ INSTALLED_APPS = [
 
     # Custom Apps
     'website',
-    'userprofile',
+    # 'userprofile',
     'post',
     'medicalcase',
     'invitation',
@@ -183,7 +184,7 @@ ACCOUNT_UNIQUE_EMAIL = True
 
 ORGS_SLUGFIELD = 'django_extensions.db.fields.AutoSlugField'
 
-LOGIN_REDIRECT_URL = '/feed'
+LOGIN_REDIRECT_URL = '/discussions'
 
 EMAIL_BACKEND = config('EMAIL_BACKEND')
 MAILGUN_ACCESS_KEY = config('MAILGUN_ACCESS_KEY')
@@ -202,5 +203,4 @@ DJANGO_WYSIWYG_FLAVOR = "ckeditor"
 
 settings.COUNTRIES_FIRST = ['UG']
 
-
-
+LOGOUT_REDIRECT_URL = '/login'
